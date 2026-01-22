@@ -18,8 +18,9 @@ COPY --from=builder /app .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 EXPOSE 8080
 
 # Run database migrations and start the Django application
-ENTRYPOINT ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+ENTRYPOINT ["sh", "-c", "while ! nc -z db 3306; do echo 'Waiting for MySQL...'; sleep 1; done; python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
